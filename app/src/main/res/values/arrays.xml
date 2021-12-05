@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="currency">
+        <item>@string/ruble</item>
+        <item>@string/dollar</item>
+    </string-array>
+
+    <string-array name="currency_value">
+        <item>@string/ruble_value</item>
+        <item>@string/dollar_value</item>
+    </string-array>
+</resources>

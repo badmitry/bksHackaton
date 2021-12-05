@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <style name="text">text</style>
+
+    <style name="sub_title" parent="@style/text">
+        <item name="android:textColor">@color/bks_black</item>
+        <item name="android:textSize">16sp</item>
+    </style>
+
+    <style name="title" parent="@style/text">
+        <item name="android:textColor">@color/bks_black</item>
+        <item name="android:textSize">18sp</item>
+        <item name="android:textStyle">bold</item>
+    </style>
+
+    <style name="Button" parent="ThemeOverlay.AppCompat">
+        <item name="android:backgroundTint">@color/bks_light_blue</item>
+        <item name="android:layout_gravity">center</item>
+    </style>
+
+    <style name="AppBarTheme" parent="ThemeOverlay.MaterialComponents.ActionBar">
+        <item name="android:background">@color/bks_white</item>
+        <item name="titleTextAppearance">@style/title</item>
+        <item name="layout_collapseMode">pin</item>
+    </style>
+
+    <style name="TextInputEditTextStile" parent="Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+        <item name="android:maxLines">1</item>
+        <item name="android:singleLine">true</item>
+        <item name="boxStrokeErrorColor">@color/bks_red</item>
+        <item name="counterOverflowTextColor">@color/bks_red</item>
+        <item name="errorTextColor">@color/bks_red</item>
+        <item name="hintTextColor">@color/bks_light_blue</item>
+        <item name="boxStrokeColor">@color/bks_light_blue</item>
+        <item name="errorIconDrawable">@null</item>
+        <item name="helperTextEnabled">true</item>
+        <item name="hintEnabled">true</item>
+    </style>
+
+    <style name="TextInputEditTextStile.password">
+        <item name="passwordToggleEnabled">true</item>
+    </style>
+</resources>

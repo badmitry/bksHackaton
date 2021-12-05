@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <data>
+
+        <variable
+            name="params"
+            type="com.badmitry.domain.entities.ParamsOfPortfolio" />
+    </data>
+
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/cv_profitability"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/dp_12"
+        android:visibility="gone">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="@dimen/dp_12"
+                android:gravity="center"
+                android:text="@string/profitability"
+                android:theme="@style/title" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="@dimen/dp_12"
+                android:text="@{@string/invest_today + @string/space + (String.valueOf(params.inputSum)) + @string/space + params.currency}"
+                android:theme="@style/text" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="end"
+                android:text="@{@string/profitability + @string/space + (String.valueOf(params.profitabilityInPercent)) + @string/space + @string/percent}"
+                android:theme="@style/text" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="@dimen/dp_12"
+                android:text="@{@string/in_end_time + @string/space + (String.valueOf(params.cash)) + @string/space + params.currency}"
+                android:theme="@style/text" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="end"
+                android:text="@{@string/profitability_value + @string/space + (String.valueOf(params.profitabilityValue)) + @string/space + params.currency}"
+                android:theme="@style/text" />
+        </LinearLayout>
+
+    </com.google.android.material.card.MaterialCardView>
+</layout>

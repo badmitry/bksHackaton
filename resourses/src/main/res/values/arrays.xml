@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="portfolio_graph_titles">
+        <item>@string/profitability</item>
+        <item>@string/payouts</item>
+        <item>@string/portfolio_composition</item>
+    </string-array>
+
+</resources>
