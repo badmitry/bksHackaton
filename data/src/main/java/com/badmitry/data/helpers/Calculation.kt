@@ -5,7 +5,7 @@ import com.badmitry.domain.entities.BondData
 import com.badmitry.domain.entities.InvestParams
 import com.badmitry.domain.entities.ParamsOfPortfolio
 import java.util.*
-import java.util.concurrent.TimeUnit
+import kotlin.math.roundToInt
 
 object Calculation {
     private val MINIMAL_COUNT_OF_BONDS = 1
@@ -44,22 +44,22 @@ object Calculation {
             }
         }
         currentListOfBonds.forEach {
-            val countOfDays = TimeUnit.DAYS.convert(
-                (it.dateOfClose.time - currentDate.time),
-                TimeUnit.MILLISECONDS
-            )
-//            Log.e("!!!", "${it.name} $countOfDays")
-            it.profitabilityReal =
-                it.profitabilityInPercent * it.priceOfLot!! / 100 / it.sizeOfLot / 365 * countOfDays / (it.nominalPrice * it.priceInPercent / 100)
-//            Log.e("!!!", " ${it.profitabilityReal}")
             calendar.time = it.dateOfClose
             while (calendar.time.time > currentDate.time) {
                 it.listOfDateCoupons.add(calendar.time)
                 calendar.add(Calendar.DAY_OF_YEAR, -it.periodCouponPayouts)
             }
-//            it.listOfDateCoupons.forEach {
-//                Log.e("!!!", it.toString())
-//            }
+            var profitability = 0.0
+            it.listOfDateCoupons.forEach { date ->
+                profitability += it.couponValue
+            }
+            profitability += it.nominalPrice - it.nominalPrice * it.priceInPercent / 100
+            profitability -= it.accumulatedCoupon
+            it.profitabilityReal = profitability / (it.nominalPrice * it.priceInPercent)
+//            Log.e(
+//                "!!!evil",
+//                "${it.name} $profitability ${it.profitabilityReal} ${it.listOfDateCoupons.size}"
+//            )
         }
         currentListOfBonds.sortBy { it.profitabilityReal }
         investParams.investSum?.let {
@@ -88,7 +88,6 @@ object Calculation {
     }
 
     private fun calculateOptimalBond(listBonds: List<BondData>, countResult: Int) {
-        Log.e("!!!", "calculateOptimalBond ${listBonds.size - 1} ${listBonds.size - countResult}")
         for (i in (listBonds.size - 1) downTo (listBonds.size - countResult)) {
             finalList.add(listBonds[i])
             Log.e("!!!", "${listBonds[i].name} ${listBonds[i].profitabilityReal}")
@@ -99,81 +98,77 @@ object Calculation {
         listBonds: List<BondData>,
         currency: String,
         investSum: Double,
-        years: Int,
+        countOfYears: Int,
         useIIS: Boolean
     ): ParamsOfPortfolio {
-        var cash = 0.0
-        var maxPriceOfProportion = 0.0
-        cash = investSum
-        maxPriceOfProportion =
+        var cash = investSum
+        var accumulatedCoupons = 0.0
+        var maxPriceOfProportion =
             if (investSum > MINIMAL_SUMM) investSum / COUNT_OF_BONDS else investSum
         listBonds.forEach { bond ->
-            var count = 0
-            bond.priceOfLot?.let {
-                count =
-                    ((maxPriceOfProportion / (it + bond.accumulatedCoupon * bond.sizeOfLot)) / bond.sizeOfLot).toInt()
-                cash -= (count * it + bond.accumulatedCoupon * bond.sizeOfLot * count)
-                Log.e("cash:", cash.toString())
-                bond.countOfBondInPortfolio = count
-            }
+            val countOfLots =
+                ((maxPriceOfProportion / (bond.priceOfLot + bond.accumulatedCoupon * bond.sizeOfLot)) / bond.sizeOfLot).toInt()
+            val accumulatedCoupon = bond.accumulatedCoupon * bond.sizeOfLot * countOfLots
+            accumulatedCoupons += accumulatedCoupon
+            cash -= (countOfLots * bond.priceOfLot + accumulatedCoupon)
+            bond.countOfBondInPortfolio = countOfLots / bond.sizeOfLot
+            bond.priceOfBondsInPortfolio =
+                (countOfLots * bond.priceOfLot / bond.sizeOfLot * 100).roundToInt() / 100.0
+            bond.currency = currency
+            bond.countOfBondInPortfolioInPercent =
+                ((bond.priceOfBondsInPortfolio / investSum * 100) * 100).roundToInt() / 100.0
         }
-        val paramsOfPortfolio = ParamsOfPortfolio(listBonds, currency, cash, investSum, years = years)
+        val paramsOfPortfolio =
+            ParamsOfPortfolio(listBonds, currency, cash, investSum, paymentToAccumulatedCoupons = accumulatedCoupons, countOfYears = countOfYears)
         val calendar = Calendar.getInstance()
         listBonds.forEach { bond ->
             bond.listOfDateCoupons.forEach { date ->
                 calendar.time = date
                 val year = calendar.get(Calendar.YEAR)
                 Log.e("!!!", "${year} ${bond.name}")
-                var coupon = 0.0
-                bond.countOfBondInPortfolio?.let {
-                    coupon = bond.couponValue * it
-                } ?: run {
-                    coupon = bond.couponValue * 1
-                }
-                payout(paramsOfPortfolio, year, coupon)
+                var coupon = bond.couponValue * bond.countOfBondInPortfolio
+                couponPayout(paramsOfPortfolio, year, coupon)
             }
             calendar.time = bond.dateOfClose
             val lastYear = calendar.get(Calendar.YEAR)
-            var price = 0.0
-            bond.countOfBondInPortfolio?.let {
-                price = bond.nominalPrice * it
-            } ?: run {
-                price = bond.nominalPrice * 1
-            }
+            val price = bond.nominalPrice * bond.countOfBondInPortfolio
             payout(paramsOfPortfolio, lastYear, price)
         }
         if (useIIS) {
             val currentDate = Date()
             calendar.time = currentDate
-            var yearForIIS = calendar.get(Calendar.YEAR)
-            for (i in 0 until (years + 1)) {
+            for (i in 0 until (countOfYears - 1)) {
                 val sumOfIIS = if (paramsOfPortfolio.inputSum > MAX_SUM_FOR_IIS) {
                     MAX_IIS.toDouble()
                 } else {
                     paramsOfPortfolio.inputSum * 0.13
                 }
                 calendar.add(Calendar.YEAR, 1)
-                yearForIIS = calendar.get(Calendar.YEAR)
+                val yearForIIS = calendar.get(Calendar.YEAR)
                 paramsOfPortfolio.mapForIIS[yearForIIS] = sumOfIIS
-                paramsOfPortfolio.mapForIIS.forEach{
-                    Log.e("evil:::", "${it.key} ${it.value}")
-                }
                 paramsOfPortfolio.sumOfIIS += sumOfIIS
             }
         }
-        Log.e("evil:::", "${paramsOfPortfolio.cash} ${paramsOfPortfolio.sumOfIIS} ${paramsOfPortfolio.inputSum}")
         paramsOfPortfolio.cash += paramsOfPortfolio.sumOfIIS
+        paramsOfPortfolio.cash = (paramsOfPortfolio.cash * 100).roundToInt() / 100.0
         paramsOfPortfolio.profitabilityValue =
-            (paramsOfPortfolio.cash - paramsOfPortfolio.inputSum).toInt()
+            ((paramsOfPortfolio.cash - paramsOfPortfolio.inputSum) * 100).roundToInt() / 100.0
         paramsOfPortfolio.profitabilityInPercent =
-            ((paramsOfPortfolio.profitabilityValue / paramsOfPortfolio.inputSum * 100) / years).toInt()
+            ((paramsOfPortfolio.profitabilityValue / paramsOfPortfolio.inputSum * 100) / paramsOfPortfolio.countOfYears * 100).roundToInt() / 100.0
         return paramsOfPortfolio
     }
 
+    private fun couponPayout(paramsOfPortfolio: ParamsOfPortfolio, year: Int, payout: Double) {
+        paramsOfPortfolio.mapOfCouponPayouts[year]?.let {
+            paramsOfPortfolio.mapOfCouponPayouts[year] = (payout + it)
+        } ?: paramsOfPortfolio.mapOfCouponPayouts.put(year, payout)
+        paramsOfPortfolio.cash += payout
+    }
+
     private fun payout(paramsOfPortfolio: ParamsOfPortfolio, year: Int, payout: Double) {
-        paramsOfPortfolio.mapOfPayouts[year]?.let {
-            paramsOfPortfolio.mapOfPayouts += year to (payout + it)
-        } ?: paramsOfPortfolio.mapOfPayouts.put(year, payout)
+        paramsOfPortfolio.mapOfPayout[year]?.let {
+            paramsOfPortfolio.mapOfPayout[year] = (payout + it)
+        } ?: paramsOfPortfolio.mapOfPayout.put(year, payout)
         paramsOfPortfolio.cash += payout
     }
 }

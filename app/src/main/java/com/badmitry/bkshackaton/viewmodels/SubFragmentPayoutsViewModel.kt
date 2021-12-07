@@ -24,16 +24,15 @@ class SubFragmentPayoutsViewModel @Inject constructor(
             calendar.time = currentDate
             var sumOfIIS = 0.0
             var cash = 0.0
-            for (i in 0 until it.years) {
-                calendar.add(Calendar.YEAR, 1)
+            for (i in 0 until it.countOfYears + 1) {
                 val year = calendar.get(Calendar.YEAR)
-                it.mapOfPayouts.forEach {
-                    if (it.key < year) {
-                        cash += it.value
+                it.mapOfCouponPayouts.forEach {
+                    if (it.key == year) {
+                        cash = it.value
                     }
                 }
                 it.mapForIIS.forEach {
-                    if (it.key <= year) {
+                    if (it.key == year) {
                         sumOfIIS = it.value
                     }
                 }
@@ -55,6 +54,7 @@ class SubFragmentPayoutsViewModel @Inject constructor(
                         )
                     )
                 }
+                calendar.add(Calendar.YEAR, 1)
             }
         }
         liveData.value = currentFinances

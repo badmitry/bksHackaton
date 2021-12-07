@@ -22,6 +22,7 @@ object BondMaper {
                         it[9].toInt(),
                         it[10].toDouble(),
                         convertToDate(it[13]),
+                        it[13],
                         it[15].toInt()
                     )
                 )

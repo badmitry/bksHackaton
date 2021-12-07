@@ -24,7 +24,6 @@ class SubFragmentGraphRVAdapter(
                 finances.add(it)
             }
         }
-        this.finances.addAll(data)
         notifyDataSetChanged()
     }
 

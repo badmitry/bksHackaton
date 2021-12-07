@@ -39,7 +39,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:gravity="end"
-                android:text="@{@string/profitability + @string/space + (String.valueOf(params.profitabilityInPercent)) + @string/space + @string/percent}"
+                android:text="@{@string/profitability + @string/space + (String.valueOf(params.profitabilityInPercent)) + @string/space + @string/percent_in_year}"
                 android:theme="@style/text" />
 
             <TextView

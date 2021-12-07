@@ -13,12 +13,16 @@ data class BondData(
     val sizeOfLot: Int,
     val nominalPrice: Double,
     val dateOfClose: Date,
+    val dateOfCloseInString: String,
     val periodCouponPayouts: Int,
     var isGos: Boolean = false,
-    var priceOfLot: Double? = null,
-    var profitabilityReal: Double? = null,
+    var priceOfLot: Double = 0.0,
+    var profitabilityReal: Double = 0.0,
     val listOfDateCoupons: MutableList<Date> = mutableListOf(),
-    var countOfBondInPortfolio: Int? = null
+    var countOfBondInPortfolio: Int = 0,
+    var countOfBondInPortfolioInPercent: Double = 0.0,
+    var priceOfBondsInPortfolio: Double = 0.0,
+    var currency: String = Currencys.RUB.name
 )
 
 

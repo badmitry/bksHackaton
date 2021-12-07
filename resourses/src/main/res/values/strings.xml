@@ -26,7 +26,7 @@
     <string name="years">года</string>
     <string name="many_years">лет</string>
     <string name="invest_today">Инвестиции сегодня</string>
-    <string name="percent">% годовых</string>
+    <string name="percent_in_year">% годовых</string>
     <string name="space">\ \</string>
     <string name="in_end_time">В конце срока будет</string>
     <string name="profitability_value">Прибыль</string>
@@ -36,4 +36,8 @@
     <string name="corp_bonds">Корпоративные облигации</string>
     <string name="cash_bonds">Наличные средства</string>
     <string name="ndfl">Возмещение НДФЛ</string>
+    <string name="until">До</string>
+    <string name="count">шт</string>
+    <string name="of_portfolio">портфеля</string>
+    <string name="percent">%</string>
 </resources>
